@@ -6,12 +6,14 @@ function Player(num) {
   const enemyBoard = utils.getEmptyBoard();
   function fire(x, y) {
     if (enemyBoard[x][y] === 'X' || enemyBoard[x][y] === 'O') { return 'ERROR'; }
-    return utils.pubsub.publish(`player${num}Played`, [x, y]);
+    utils.pubsub.publish(`player${num}Played`, [x, y]);
+
+    return (() => { utils.pubsub.publish(`player${num}Played`, [x, y]); })();
   }
 
   function takeFire([x, y]) {
     const { shipHit, board } = playerBoard.receiveAttack(x, y);
-    utils.pubsub.publish(`player${num}BoardChanged`, board);
+    // utils.pubsub.publish(`player${num}BoardChanged`, board);
     if (shipHit) { utils.pubsub.publish(`player${num}Hit`, [x, y, true]); } else { utils.pubsub.publish(`player${num}Hit`, [x, y, false]); }
   }
   utils.pubsub.subscribe(`player${num === 2 ? 1 : 2}Played`, takeFire);

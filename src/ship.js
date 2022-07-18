@@ -9,6 +9,9 @@ function Ship(length, { x, y, orientation }) {
     case 3:
       name = 'Submarine';
       break;
+    case 3.5:
+      name = 'Battleship';
+      break;
     case 4:
       name = 'Destroyer';
       break;
@@ -19,13 +22,13 @@ function Ship(length, { x, y, orientation }) {
       name = 'ERROR';
       break;
   }
-
+  const lengthFloor = Math.floor(length);
   const position = (() => { // put the ship in an empty board
-    if (name === 'ERROR' || x + length > 10 || y + length > 10) {
+    if (name === 'ERROR' || (orientation === 'v' && x + lengthFloor > 10) || (orientation === 'h' && y + lengthFloor > 10)) {
       return 'ERROR';
     }
     const newArray = utils.getEmptyBoard();
-    for (let i = 0; i < length; i += 1) {
+    for (let i = 0; i < lengthFloor; i += 1) {
       if (orientation === 'v') {
         newArray[x + i][y] = name.at(0);
       } else {
@@ -55,7 +58,7 @@ function Ship(length, { x, y, orientation }) {
   }
 
   return {
-    length,
+    length: lengthFloor,
     name,
     position,
     hit,

@@ -2,12 +2,12 @@ import * as utils from './utils';
 import Ship from './ship';
 
 function Gameboard(size = 10) {
-  let board = utils.getEmptyBoard(size);
+  let pBoard = utils.getEmptyBoard(size);
 
   const ships = [];
 
   function addToBoard({ position }) {
-    board = board.map((a, i) => (a.map((b, j) => {
+    pBoard = pBoard.map((a, i) => (a.map((b, j) => {
       if (position[i][j] === 'O' || position[i][j] === 'X') {
         return 'X';
       }
@@ -16,12 +16,12 @@ function Gameboard(size = 10) {
   }
 
   function updateBoard() {
-    board = utils.getEmptyBoard(size);
+    pBoard = utils.getEmptyBoard(size);
     ships.forEach((ship) => addToBoard(ship));
   }
 
   function checkBoard() {
-    board.forEach((vector) => vector.forEach((element) => {
+    pBoard.forEach((vector) => vector.forEach((element) => {
       if (element.length > 1) { throw new Error('There another ship in that place'); }
     }));
   }
@@ -30,7 +30,7 @@ function Gameboard(size = 10) {
     ships.push(ship);
     updateBoard();
     checkBoard();
-    return { status: 'SUCCESS', board };
+    return { status: 'SUCCESS', board: pBoard };
   }
 
   function receiveAttack(x, y) {
@@ -41,7 +41,7 @@ function Gameboard(size = 10) {
       }
     });
     updateBoard();
-    return { shipHit, board };
+    return { shipHit, board: pBoard };
   }
 
   function isGameOver() {
@@ -58,7 +58,8 @@ function Gameboard(size = 10) {
     addShip,
     receiveAttack,
     isGameOver,
-    board,
+    get board() { return pBoard; },
+    // board: pBoard,
   };
 }
 

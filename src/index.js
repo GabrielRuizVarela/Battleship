@@ -1,51 +1,53 @@
 import './style.scss';
-import Ship from './ship';
+// import Ship from './ship';
 import * as utils from './utils';
-import Gameboard from './gameboard';
+// import Gameboard from './gameboard';
 import Player from './player';
+import * as DOM from './DOM';
 
-const ships1 = [
-  { lenght: 2, coord: { x: 0, y: 0, orientation: 'v' } },
-  { lenght: 3, coord: { x: 5, y: 0, orientation: 'h' } },
-];
-const shoots1 = [
-  [0, 0],
-  [1, 0],
-  [5, 0],
-  [5, 1],
-  // [5, 4],
-  [5, 1],
-];
+// --- init ---
 
-const ships2 = [
-  { lenght: 2, coord: { x: 9, y: 8, orientation: 'h' } },
-  { lenght: 3, coord: { x: 0, y: 5, orientation: 'v' } },
-];
-const shoots2 = [
-  [9, 8],
-  [9, 9],
-  [0, 5],
-  [1, 5],
-  [2, 5],
-];
+const playerGrid = DOM.createGrid();
+playerGrid.setAttribute('id', 'player-grid');
+document.body.appendChild(playerGrid);
 
+const enemyGrid = DOM.createGrid();
+enemyGrid.setAttribute('id', 'enemy-grid');
+document.body.appendChild(enemyGrid);
+
+utils.pubsub.subscribe('player1BoardChanged', (board) => DOM.updateGrid(board, playerGrid));
+
+const shipsClassicTemplate = [2, 3, 3.5, 4, 5];
 const player1 = Player(1);
 const player2 = Player(2);
-// player2.playerBoard.addShip(ships2[0].lenght, ships2[0].coord);
-ships1.forEach((ship) => player1.playerBoard.addShip(ship.lenght, ship.coord));
-ships2.forEach((ship) => player2.playerBoard.addShip(ship.lenght, ship.coord));
-// let turn = player1;
-let i = 0;
-// while (i < 5) {
-while (!player1.playerBoard.isGameOver() && !player2.playerBoard.isGameOver()) {
-  player1.fire(shoots2[i][0], shoots2[i][1]);
-  player2.fire(shoots1[i][0], shoots1[i][1]);
-  i += 1;
-  // turn = turn === player1 ? turn = player2 : turn = player1;
+function enemyBoardEvent(e) {
+  const x = e.target.getAttribute(['data-x']);
+  const y = e.target.getAttribute(['data-y']);
+  player1.fire(x, y);
+  player2.computerFire();
 }
-console.table(player1.playerBoard.board);
-console.table(player1.enemyBoard);
-console.table(player2.playerBoard.board);
-console.table(player2.enemyBoard);
+enemyGrid.querySelectorAll('div').forEach((div) => div.addEventListener('click', enemyBoardEvent));
+utils.pubsub.subscribe('enemy1BoardChanged', (board) => DOM.updateEnemyGrid(board, enemyGrid, enemyBoardEvent));
 
-console.log(player2.playerBoard.isGameOver());
+shipsClassicTemplate.forEach((length) => {
+  player1.addComputerShip(length);
+  player2.addComputerShip(length);
+});
+
+console.table(player2.playerBoard.board);
+
+DOM.editMode(playerGrid);
+// console.log(utils.isPositionValid(2, { x: 0, y: 2, orientation: 'v' }, playerGrid));
+
+// const ships = [
+//   { length: 2, url: './patrol.svg' },
+//   { length: 3, url: './submarine.svg' },
+//   { length: 3.5, url: './destroyer.svg' },
+//   { length: 4, url: './destroyer.svg' },
+//   { length: 5, url: './carrier.svg' },
+// ];
+// const shipOverlay = document.createElement('div');
+// shipOverlay.classList.add('ship-overlay');
+// // document.querySelector('div').clientHeight
+// shipOverlay.style.backgroundImage = `url("${ships[0].url}")`;
+// document.body.appendChild(shipOverlay);

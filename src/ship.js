@@ -24,8 +24,8 @@ function Ship(length, { x, y, orientation }) {
   }
   const lengthFloor = Math.floor(length);
   const position = (() => { // put the ship in an empty board
-    if (name === 'ERROR' || (orientation === 'v' && x + lengthFloor > 10) || (orientation === 'h' && y + lengthFloor > 10)) {
-      return 'ERROR';
+    if ((orientation === 'v' && x + lengthFloor > 10) || (orientation === 'h' && y + lengthFloor > 10)) {
+      throw new Error('ERROR: The ship is out of bounds');
     }
     const newArray = utils.getEmptyBoard();
     for (let i = 0; i < lengthFloor; i += 1) {

@@ -8,7 +8,10 @@ function Gameboard(size = 10) {
 
   function addToBoard({ position }) {
     pBoard = pBoard.map((a, i) => (a.map((b, j) => {
-      if (position[i][j] === 'O' || position[i][j] === 'X') {
+      if (position[i][j].includes('O')) {
+        return 'O';
+      }
+      if (position[i][j].includes('X')) {
         return 'X';
       }
       return b + position[i][j];
@@ -22,26 +25,31 @@ function Gameboard(size = 10) {
 
   function checkBoard() {
     pBoard.forEach((vector) => vector.forEach((element) => {
-      if (element.length > 1) { throw new Error('There another ship in that place'); }
+      if (element.length > 1) {
+        ships.pop();
+        throw new Error('There another ship in that place');
+      }
     }));
   }
+
   function addShip(length, { x, y, orientation }) {
     const ship = Ship(length, { x, y, orientation });
     ships.push(ship);
     updateBoard();
     checkBoard();
-    return { status: 'SUCCESS', board: pBoard };
+    return 'SUCCESS';
   }
 
   function receiveAttack(x, y) {
-    let shipHit;
-    ships.forEach((ship) => {
-      if (ship.hit(x, y) === 'HIT') {
-        shipHit = ship;
+    for (let i = 0; i < ships.length; i += 1) {
+      const hit = ships[i].hit(x, y);
+      updateBoard();
+      if (hit === 'HIT') {
+        const shipHit = ships[i];
+        return { shipHit, board: pBoard };
       }
-    });
-    updateBoard();
-    return { shipHit, board: pBoard };
+    }
+    return { board: pBoard };
   }
 
   function isGameOver() {
@@ -59,7 +67,6 @@ function Gameboard(size = 10) {
     receiveAttack,
     isGameOver,
     get board() { return pBoard; },
-    // board: pBoard,
   };
 }
 

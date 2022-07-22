@@ -39,7 +39,7 @@ function Player(num) {
         fire(x, y);
         return;
       } catch (err) {
-        console.log(err);
+        // console.log(err);
       }
     }
   }
@@ -52,7 +52,7 @@ function Player(num) {
   function addComputerShip(lenght, size = 10) {
     let x; let y; let orientation;
     let count = 0;
-    while (true) {
+    for (let i = 0; i < 100; i += 1) {
       try {
         orientation = Math.floor(Math.random() * 2) ? 'v' : 'h';
         const size1 = orientation === 'v' ? (size - Math.floor(lenght)) : size;
@@ -62,7 +62,7 @@ function Player(num) {
         count = 0;
         break;
       } catch (err) {
-        console.log(err);
+        // console.log(err);
         count += 1;
         if (count > 100) { break; }
       }

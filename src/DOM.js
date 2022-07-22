@@ -4,18 +4,23 @@ import patrol from './patrol.svg';
 import submarine from './submarine.svg';
 import destroyer from './destroyer.svg';
 import carrier from './carrier.svg';
+import patrolv from './patrol-v.svg';
+import submarinev from './submarine-v.svg';
+import destroyerv from './destroyer-v.svg';
+import destroyerbv from './destroyer1v.svg';
+import carrierv from './carrier-v.svg';
 import { pubsub } from './utils';
 
 const IMG = [];
 const ships = [
-  { length: 2, url: patrol },
-  { length: 3, url: submarine },
-  { length: 3.5, url: destroyer },
-  { length: 4, url: destroyer },
-  { length: 5, url: carrier },
+  { length: 2, url: patrol, v: patrolv },
+  { length: 3, url: submarine, v: submarinev },
+  { length: 3.5, url: destroyer, v: destroyerv },
+  { length: 4, url: destroyer, v: destroyerbv },
+  { length: 5, url: carrier, v: carrierv },
 ];
 let shipIndex = 0;
-const ORIENTATION = 'v';
+const ORIENTATION = 'h';
 const LENGHT = 3;
 
 function createGrid(size = 10) {
@@ -73,24 +78,27 @@ function addShipToGrid(e) {
   const length = Math.floor(ships[shipIndex].length);
   const grid = e.target.parentNode;
   const image = document.createElement('span');
-  image.style.backgroundImage = `url("${ships[shipIndex].url}")`;
   image.classList.add('ship-over');
   if (ORIENTATION === 'h') {
+    image.style.backgroundImage = `url("${ships[shipIndex].url}")`;
     image.style.height = `${e.target.clientHeight}px`;
     image.style.width = `${e.target.clientWidth * length}px`;
   } else {
-    image.style.transform = 'rotate(90deg)';
-    image.style.height = `${e.target.clientHeight}px`;
-    image.style.width = `${e.target.clientWidth * length}px`;
-    image.style.top = length < 4 ? `${33 * length}%` : `${38 * length}%`;
-    image.style.left = `${-30 * length}%`;
+    image.style.backgroundImage = `url("${ships[shipIndex].v}")`;
+    image.style.height = `${e.target.clientHeight * length}px`;
+    image.style.width = `${e.target.clientWidth}px`;
+    // } else {
+
+    // image.style.transform = 'rotate(90deg)';
+    // image.style.height = `${e.target.clientHeight}px`;
+    // image.style.width = `${e.target.clientWidth * length}px`;
+    // image.style.top = length < 4 ? `${33 * length}%` : `${38 * length}%`;
+    // image.style.left = `${-30 * length}%`;
   }
   IMG.push({ x, y, image });
-  console.log(IMG);
   pubsub.publish('player1AddShipToGrid', { length: Math.floor(ships[shipIndex].length), coord: { x, y, orientation: ORIENTATION } });
   if (shipIndex < 4) { shipIndex += 1; } else {
     pubsub.publish('killEvents', grid);
-    console.log('this');
     document.querySelector('#edit-button').remove();
   }
 }
@@ -135,10 +143,6 @@ function editModeEvent(e) {
   const y = e.target.getAttribute(['data-y']);
   const grid = e.target.parentNode;
 
-  const shipOverlay = document.createElement('span');
-  shipOverlay.classList.add('ship-overlay');
-  shipOverlay.style.backgroundImage = `url("${ships[shipIndex].url}")`;
-
   const array = Array.from(grid.querySelectorAll('div'));
   array.forEach((div) => {
     div.classList.remove('invalid');
@@ -152,17 +156,24 @@ function editModeEvent(e) {
     { x, y, orientation: ORIENTATION },
     grid,
   );
+  const shipOverlay = document.createElement('span');
+  shipOverlay.classList.add('ship-overlay');
   if (positionIsValid) {
     manageValidClass(length, { x, y, orientation: ORIENTATION }, grid, 'valid');
     if (ORIENTATION === 'h') {
+      shipOverlay.style.backgroundImage = `url("${ships[shipIndex].url}")`;
       shipOverlay.style.height = `${e.target.clientHeight}px`;
       shipOverlay.style.width = `${e.target.clientWidth * length}px`;
     } else {
-      shipOverlay.style.transform = 'rotate(90deg)';
-      shipOverlay.style.height = `${e.target.clientHeight}px`;
-      shipOverlay.style.width = `${e.target.clientWidth * length}px`;
-      shipOverlay.style.top = length < 4 ? `${33 * length}%` : `${38 * length}%`;
-      shipOverlay.style.left = `${-30 * length}%`;
+      shipOverlay.style.backgroundImage = `url("${ships[shipIndex].v}")`;
+      shipOverlay.style.height = `${e.target.clientHeight * length}px`;
+      shipOverlay.style.width = `${e.target.clientWidth}px`;
+
+      // shipOverlay.style.transform = 'rotate(90deg)';
+      // shipOverlay.style.height = `${e.target.clientHeight}px`;
+      // shipOverlay.style.width = `${e.target.clientWidth * length}px`;
+      // shipOverlay.style.top = length < 4 ? `${33 * length}%` : `${38 * length}%`;
+      // shipOverlay.style.left = `${-30 * length}%`;
     }
     e.target.appendChild(shipOverlay);
     array[xyToIndex(x, y)].addEventListener('click', addShipToGrid);

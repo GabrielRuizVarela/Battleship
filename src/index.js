@@ -34,25 +34,9 @@ shipsClassicTemplate.forEach((length) => {
   player2.addComputerShip(length);
 });
 utils.pubsub.subscribe('player1AddShipToGrid', ({ length, coord }) => {
-  // utils.pubsub.subscribe('player1BoardChanged', (board) => console.table(board));
   player1.addShip(length, coord);
-  console.table(player1.playerBoard.board);
-  console.log({ length, coord });
+  // console.table(player1.playerBoard.board);
+  // console.log({ length, coord });
 });
-// console.table(player2.playerBoard.board);
 
 DOM.editMode(playerGrid);
-// console.log(utils.isPositionValid(2, { x: 0, y: 2, orientation: 'v' }, playerGrid));
-
-// const ships = [
-//   { length: 2, url: './patrol.svg' },
-//   { length: 3, url: './submarine.svg' },
-//   { length: 3.5, url: './destroyer.svg' },
-//   { length: 4, url: './destroyer.svg' },
-//   { length: 5, url: './carrier.svg' },
-// ];
-// const shipOverlay = document.createElement('div');
-// shipOverlay.classList.add('ship-overlay');
-// // document.querySelector('div').clientHeight
-// shipOverlay.style.backgroundImage = `url("${ships[0].url}")`;
-// document.body.appendChild(shipOverlay);

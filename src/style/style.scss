@@ -1,6 +1,6 @@
 @use "colors" as *;
 @use "shades" as *;
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital@1&display=swap");
 
 @function clr($color, $shade) {
   $newcolor: map-get($colors, $color);
@@ -26,6 +26,8 @@ body {
 body {
   background-image: url("../images/wood-texture.jpg");
   background-size: 100px;
+  display: grid;
+  grid-template-rows: auto auto;
 }
 
 button,
@@ -120,6 +122,7 @@ main {
   padding: 0.5rem;
   font-size: 1rem;
   border: 1px solid white;
+  height: min-content;
 }
 
 #title {
@@ -136,7 +139,7 @@ main {
   display: grid;
   height: 100%;
   width: 100%;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 500px));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 500px));
   gap: 1rem;
   justify-content: center;
 }
@@ -190,4 +193,18 @@ main {
 }
 .miss {
   background-color: rgba(0, 0, 255, 0.213);
+}
+
+footer {
+  // position: absolute;
+  // bottom: 0;
+  // right: 0;
+  align-self: flex-end;
+  margin: 0.5rem;
+  a {
+    text-decoration: none;
+    font-family: "Montserrat", sans-serif;
+    color: white;
+    font-size: 0.8rem;
+  }
 }

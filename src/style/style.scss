@@ -1,0 +1,193 @@
+@use "colors" as *;
+@use "shades" as *;
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+
+@function clr($color, $shade) {
+  $newcolor: map-get($colors, $color);
+  $newshade: map-get($shades, $shade);
+  @return rgba($newcolor, $newshade);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Bebas Neue", cursive;
+}
+
+:root,
+body {
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+body {
+  background-image: url("../images/wood-texture.jpg");
+  background-size: 100px;
+}
+
+button,
+.tile {
+  cursor: pointer;
+}
+
+.valid {
+  background-color: clr(secondary, 4);
+  color: clr(primary, 4);
+}
+.invalid {
+  background-color: clr(primary, 4);
+  color: clr(secondary, 4);
+}
+
+.ship-overlay,
+.ship-over {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border: none;
+}
+
+dialog {
+  max-width: 50ch;
+  margin: auto;
+  box-shadow: 0 2px 1rem 5px clr(black, 4);
+  border-left: clr(primary, 5) solid 0.8rem;
+  border-right: clr(secondary, 5) solid 0.8rem;
+  border-top: none;
+  border-bottom: none;
+  border-radius: 0.5rem;
+  h1 {
+    font-size: 2.1rem;
+  }
+  > div {
+    padding: 2rem;
+    background: linear-gradient(
+      45deg,
+      clr(secondary, 3) 30%,
+      clr(primary, 3) 100%
+    );
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    grid-template-rows: repeat(2, 1fr);
+  }
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 1rem;
+    gap: 0.2rem;
+  }
+  button {
+    font-size: 1.2rem;
+    padding: 1rem;
+    border: 1px solid white;
+  }
+  #start-game {
+    background-color: clr(primary, 5);
+    color: clr(secondary, 5);
+    aspect-ratio: 1/1;
+  }
+  #quick-start {
+    background-color: clr(secondary, 5);
+    color: clr(primary, 5);
+    aspect-ratio: 1/1;
+  }
+  #reset-button {
+    background-color: clr(primary, 5);
+    background-color: clr(secondary, 5);
+    aspect-ratio: 1/1;
+  }
+  &::backdrop {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+main {
+  display: grid;
+  padding: 1rem;
+  gap: 0.5rem;
+}
+
+#switch-orientation {
+  justify-self: center;
+  width: min-content;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid white;
+}
+
+#tittle {
+  padding: 1rem;
+  justify-self: center;
+  font-size: 5rem;
+  background: -webkit-linear-gradient(clr(secondary, 5), clr(primary, 5));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 5px -5px 0px black;
+}
+#boards {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 500px));
+  gap: 1rem;
+  justify-content: center;
+}
+
+#enemy-grid,
+#player-grid {
+  justify-self: center;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  height: 100%;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: rgb(154, 12, 12);
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    background-image: url("../images/water-texture.jpg");
+    background-repeat: repeat;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 0.75;
+  }
+  border: 1rem solid;
+  border-image-source: url("../images/plastic-texture.jpg");
+  border-image-slice: 100;
+  border-image-repeat: repeat;
+  box-shadow: 6px -8px 1rem 5px clr(black, 2);
+}
+#player-grid {
+  outline: clr(secondary, 4) solid 1px;
+}
+#enemy-grid {
+  outline: clr(primary, 4) solid 1px;
+}
+
+.tile {
+  border: 1px solid clr(primary, 5);
+  z-index: 1;
+}
+
+#enemy-grid {
+  color: black;
+}
+
+.hit {
+  background-color: rgba(255, 0, 0, 0.222);
+}
+.miss {
+  background-color: rgba(0, 0, 255, 0.213);
+}

@@ -4,7 +4,7 @@ import Ship from './ship';
 function Gameboard(size = 10) {
   let pBoard = utils.getEmptyBoard(size);
 
-  const ships = [];
+  let ships = [];
 
   function addToBoard({ position }) {
     pBoard = pBoard.map((a, i) => (a.map((b, j) => {
@@ -54,6 +54,7 @@ function Gameboard(size = 10) {
 
   function isGameOver() {
     let allShipSunk = true;
+    if (ships.length === 0) { return false; }
     ships.forEach((ship) => {
       if (!ship.isSunk()) {
         allShipSunk = false;
@@ -62,11 +63,17 @@ function Gameboard(size = 10) {
     return allShipSunk;
   }
 
+  function resetBoard() {
+    pBoard = utils.getEmptyBoard(size);
+    ships = [];
+  }
+
   return {
     addShip,
     receiveAttack,
     isGameOver,
     get board() { return pBoard; },
+    resetBoard,
   };
 }
 

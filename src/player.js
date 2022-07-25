@@ -3,7 +3,7 @@ import * as utils from './utils';
 
 function Player(num) {
   const playerBoard = Gameboard();
-  const pEnemyBoard = utils.getEmptyBoard();
+  let pEnemyBoard = utils.getEmptyBoard();
   function fire(x, y) {
     if (pEnemyBoard[x][y] === 'X' || pEnemyBoard[x][y] === 'O') { throw new Error('you can not fire where you already did'); }
     utils.pubsub.publish(`player${num}Played`, [x, y]);
@@ -67,6 +67,14 @@ function Player(num) {
         if (count > 100) { break; }
       }
     }
+    return [x, y, orientation];
+  }
+
+  function reset() {
+    pEnemyBoard = utils.getEmptyBoard();
+    playerBoard.resetBoard();
+    utils.pubsub.publish(`player${num}BoardChanged`, playerBoard.board);
+    // utils.pubsub.publish(`enemy${num}BoardChanged`, pEnemyBoard);
   }
 
   return {
@@ -76,6 +84,7 @@ function Player(num) {
     fire,
     computerFire,
     addComputerShip,
+    reset,
   };
 }
 

@@ -1,17 +1,17 @@
 /* eslint-disable no-param-reassign */
 // import pubsub from './utils';
-import patrol from './patrol.svg';
-import submarine from './submarine.svg';
-import destroyer from './destroyer.svg';
-import carrier from './carrier.svg';
-import patrolv from './patrol-v.svg';
-import submarinev from './submarine-v.svg';
-import destroyerv from './destroyer-v.svg';
-import destroyerbv from './destroyer1v.svg';
-import carrierv from './carrier-v.svg';
+import patrol from './images/patrol.svg';
+import submarine from './images/submarine.svg';
+import destroyer from './images/destroyer.svg';
+import carrier from './images/carrier.svg';
+import patrolv from './images/patrol-v.svg';
+import submarinev from './images/submarine-v.svg';
+import destroyerv from './images/destroyer-v.svg';
+import destroyerbv from './images/destroyer1v.svg';
+import carrierv from './images/carrier-v.svg';
 import { pubsub } from './utils';
 
-const IMG = [];
+let IMG = [];
 const ships = [
   { length: 2, url: patrol, v: patrolv },
   { length: 3, url: submarine, v: submarinev },
@@ -20,8 +20,20 @@ const ships = [
   { length: 5, url: carrier, v: carrierv },
 ];
 let shipIndex = 0;
-const ORIENTATION = 'h';
-const LENGHT = 3;
+let ORIENTATION = 'h';
+const switchOrientation = document.querySelector('#switch-orientation');
+switchOrientation.classList.add('valid');
+switchOrientation.addEventListener('click', () => {
+  if (ORIENTATION === 'v') {
+    ORIENTATION = 'h';
+    switchOrientation.classList.add('valid');
+    switchOrientation.classList.remove('invalid');
+  } else {
+    ORIENTATION = 'v';
+    switchOrientation.classList.add('invalid');
+    switchOrientation.classList.remove('valid');
+  }
+});
 
 function createGrid(size = 10) {
   const grid = document.createElement('div');
@@ -30,76 +42,92 @@ function createGrid(size = 10) {
       const div = document.createElement('div');
       div.setAttribute('data-x', i);
       div.setAttribute('data-y', j);
+      div.classList.add('tile');
       grid.appendChild(div);
     }
   }
   return grid;
 }
 
-function updateGrid(board, grid) {
+function updateGrid(board, grid, reset = false) {
   board.forEach((rows, x) => {
     rows.forEach((columns, y) => {
       const div = grid.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-      div.innerText = columns;
+      div.setAttribute('data-ship', columns);
+      if (columns === 'X') {
+        div.classList.add('hit');
+      }
+      if (columns === 'O') {
+        div.classList.add('miss');
+      }
+      if (reset) { div.textContent = ''; }
     });
   });
+  if (reset) {
+    IMG = [];
+    shipIndex = 0;
+  }
   IMG.forEach((img) => {
-    grid.querySelector(`[data-x="${img.x}"][data-y="${img.y}"]`).appendChild(img.image);
+    const target = grid.querySelector(`[data-x="${img.x}"][data-y="${img.y}"]`);
+    target.appendChild(img.image);
+    target.style.position = 'relative';
   });
 }
 
 function updateEnemyGrid(board, grid, eventCB) {
+  // console.table(board);
   board.forEach((rows, x) => {
     rows.forEach((columns, y) => {
       const div = grid.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-      div.textContent = columns;
+      div.setAttribute('data-ship', columns);
+      if (columns === 'X') {
+        div.classList.add('hit');
+      }
+      if (columns === 'O') {
+        div.classList.add('miss');
+      }
       div.removeEventListener('click', eventCB);
       if (columns === '') { div.addEventListener('click', eventCB); }
     });
   });
 }
 
-function modal() {
-  // console.log('hello');
-  const dialog = document.createElement('dialog');
-  dialog.open = true;
-  document.body.appendChild(dialog);
-  const div = document.createElement('div');
-  dialog.appendChild(div);
-}
-// modal();
 function xyToIndex(x, y) {
   return Number(x) * 10 + Number(y);
 }
 
 function addShipToGrid(e) {
-  const x = Number(e.target.getAttribute(['data-x']));
-  const y = Number(e.target.getAttribute(['data-y']));
+  let orientation = ORIENTATION;
+  let target;
+  if (e.orientation) {
+    orientation = e.orientation;
+    target = e.target;
+  } else {
+    target = this;
+  }
+  const x = Number(target.getAttribute(['data-x']));
+  const y = Number(target.getAttribute(['data-y']));
   const length = Math.floor(ships[shipIndex].length);
-  const grid = e.target.parentNode;
+  const grid = target.parentNode;
   const image = document.createElement('span');
   image.classList.add('ship-over');
-  if (ORIENTATION === 'h') {
+  if (orientation === 'h') {
     image.style.backgroundImage = `url("${ships[shipIndex].url}")`;
-    image.style.height = `${e.target.clientHeight}px`;
-    image.style.width = `${e.target.clientWidth * length}px`;
+    image.style.height = `${target.clientHeight}px`;
+    image.style.width = `${target.clientWidth * length}px`;
   } else {
     image.style.backgroundImage = `url("${ships[shipIndex].v}")`;
-    image.style.height = `${e.target.clientHeight * length}px`;
-    image.style.width = `${e.target.clientWidth}px`;
-    // } else {
-
-    // image.style.transform = 'rotate(90deg)';
-    // image.style.height = `${e.target.clientHeight}px`;
-    // image.style.width = `${e.target.clientWidth * length}px`;
-    // image.style.top = length < 4 ? `${33 * length}%` : `${38 * length}%`;
-    // image.style.left = `${-30 * length}%`;
+    image.style.height = `${target.clientHeight * length}px`;
+    image.style.width = `${target.clientWidth}px`;
   }
   IMG.push({ x, y, image });
-  pubsub.publish('player1AddShipToGrid', { length: Math.floor(ships[shipIndex].length), coord: { x, y, orientation: ORIENTATION } });
-  if (shipIndex < 4) { shipIndex += 1; } else {
+  if (!e.orientation) {
+    pubsub.publish('player1AddShipToGrid', { length: Math.floor(ships[shipIndex].length), coord: { x, y, orientation: ORIENTATION } });
+    if (shipIndex < ships.length - 1) { shipIndex += 1; } else {
+      pubsub.publish('killEvents', grid);
+    }
+  } else if (shipIndex < ships.length - 1) { shipIndex += 1; } else {
     pubsub.publish('killEvents', grid);
-    document.querySelector('#edit-button').remove();
   }
 }
 
@@ -110,11 +138,10 @@ function isPositionValid(length, { x, y, orientation }, grid, size = 10) {
   const index = orientation === 'v' ? nx : ny;
   for (let i = index; i < index + length && i < size; i += 1) {
     if (orientation === 'v') {
-      // console.log(array[xyToIndex(i, ny)]);
-      if (array[xyToIndex(i, ny)].textContent !== '' || index + length > size) {
+      if (!(array[xyToIndex(i, ny)].getAttribute(['data-ship']) === '' || array[xyToIndex(i, ny)].getAttribute(['data-ship']) === null) || index + length > size) {
         return false;
       }
-    } else if (array[xyToIndex(nx, i)].textContent !== '' || index + length > size) {
+    } else if (!(array[xyToIndex(nx, i)].getAttribute(['data-ship']) === '' || array[xyToIndex(i, ny)].getAttribute(['data-ship']) === null) || index + length > size) {
       return false;
     }
   }
@@ -139,17 +166,18 @@ function manageValidClass(length, { x, y, orientation }, grid, classToAdd, size 
 }
 
 function editModeEvent(e) {
+  // e.stopPropagation();
+  if (e.target !== this) { return; }
   const x = e.target.getAttribute(['data-x']);
   const y = e.target.getAttribute(['data-y']);
   const grid = e.target.parentNode;
-
-  const array = Array.from(grid.querySelectorAll('div'));
+  const array = Array.from(grid.querySelectorAll('.tile'));
   array.forEach((div) => {
     div.classList.remove('invalid');
     div.classList.remove('valid');
     if (!div.innerHTML) { div.style.position = 'static'; }
-    grid.querySelectorAll('span.ship-overlay').forEach((span) => span.remove());
   });
+  grid.querySelectorAll('span.ship-overlay').forEach((span) => span.remove());
   const length = Math.floor(ships[shipIndex].length);
   const positionIsValid = isPositionValid(
     length,
@@ -159,7 +187,8 @@ function editModeEvent(e) {
   const shipOverlay = document.createElement('span');
   shipOverlay.classList.add('ship-overlay');
   if (positionIsValid) {
-    manageValidClass(length, { x, y, orientation: ORIENTATION }, grid, 'valid');
+    shipOverlay.classList.add('valid');
+    // manageValidClass(length, { x, y, orientation: ORIENTATION }, grid, 'valid');
     if (ORIENTATION === 'h') {
       shipOverlay.style.backgroundImage = `url("${ships[shipIndex].url}")`;
       shipOverlay.style.height = `${e.target.clientHeight}px`;
@@ -168,31 +197,59 @@ function editModeEvent(e) {
       shipOverlay.style.backgroundImage = `url("${ships[shipIndex].v}")`;
       shipOverlay.style.height = `${e.target.clientHeight * length}px`;
       shipOverlay.style.width = `${e.target.clientWidth}px`;
-
-      // shipOverlay.style.transform = 'rotate(90deg)';
-      // shipOverlay.style.height = `${e.target.clientHeight}px`;
-      // shipOverlay.style.width = `${e.target.clientWidth * length}px`;
-      // shipOverlay.style.top = length < 4 ? `${33 * length}%` : `${38 * length}%`;
-      // shipOverlay.style.left = `${-30 * length}%`;
     }
-    e.target.appendChild(shipOverlay);
     array[xyToIndex(x, y)].addEventListener('click', addShipToGrid);
+    array[xyToIndex(x, y)].appendChild(shipOverlay);
   } else {
+    // shipOverlay.classList.add('invalid');
     manageValidClass(ships[shipIndex].length, { x, y, orientation: ORIENTATION }, grid, 'invalid');
     array[xyToIndex(x, y)].removeEventListener('click', addShipToGrid);
   }
 }
 
 function editMode(grid) {
-  const divs = grid.querySelectorAll('div');
+  const divs = grid.querySelectorAll('.tile');
   divs.forEach((div) => div.addEventListener('mouseover', editModeEvent));
-  const button = document.createElement('button');
-  button.id = 'edit-button';
-  button.textContent = 'Done';
-  grid.parentNode.appendChild(button);
-  button.onclick = () => {
-    divs.forEach((div) => div.removeEventListener('mouseover', editModeEvent));
-    button.remove();
+}
+
+function welcomeScreen(grid) {
+  const modal = document.querySelector('#welcome-modal');
+  modal.addEventListener('cancel', () => {
+    pubsub.publish('addShipsAtRandom', ships);
+  });
+  const startGameButton = document.querySelector('#start-game');
+  startGameButton.addEventListener('click', () => {
+    editMode(grid);
+    modal.close();
+  });
+  const quickStart = document.querySelector('#quick-start');
+  quickStart.addEventListener('click', () => {
+    pubsub.publish('addShipsAtRandom', ships);
+    modal.close();
+  });
+  modal.showModal();
+  return {
+    showModal: () => modal.showModal(),
+    close: () => modal.close(),
+  };
+}
+
+function endScreen(cb) {
+  const modal = document.querySelector('#end-modal');
+  // modal.showModal();
+  modal.addEventListener('cancel', () => {
+    cb();
+  });
+  const h1 = modal.querySelector('h1');
+  // h1.textContent = msg;
+  const button = modal.querySelector('#reset-button');
+  button.addEventListener('click', () => {
+    modal.close();
+    cb();
+  });
+  return {
+    showModal: () => modal.showModal(),
+    title: h1,
   };
 }
 
@@ -204,13 +261,16 @@ pubsub.subscribe('killEvents', (grid) => {
     if (!div.innerHTML) { div.style.position = 'static'; }
     grid.querySelectorAll('span.ship-overlay').forEach((span) => span.remove());
   });
+  pubsub.publish('ready');
 });
 
 export {
   createGrid,
   updateGrid,
   updateEnemyGrid,
-  modal,
   editMode,
   editModeEvent,
+  addShipToGrid,
+  welcomeScreen,
+  endScreen,
 };
